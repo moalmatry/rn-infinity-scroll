@@ -20,10 +20,12 @@ const MyList = () => {
   // };
 
   const fetchNextPage = async () => {
+    if (loading) return;
+    console.log("loading next page");
     setLoading(true);
     const response = await fetch(nextPage);
     const responseJson = await response.json();
-    console.log(responseJson.info);
+    // console.log(responseJson.info);
     setItems((prev) => [...prev, ...responseJson.results]);
     setNextPage(responseJson.info.next);
     setLoading(false);
@@ -39,16 +41,10 @@ const MyList = () => {
       data={items}
       renderItem={({ item }) => <CharacterListItem character={item} />}
       contentContainerStyle={{ gap: 10 }}
+      onEndReached={fetchNextPage}
+      onEndReachedThreshold={3}
       ListFooterComponent={() => (
-        <View>
-          {loading && <ActivityIndicator />}
-          <Text
-            onPress={fetchNextPage}
-            style={{ alignSelf: "center", fontSize: 20, color: "blue" }}
-          >
-            Load more
-          </Text>
-        </View>
+        <View>{loading && <ActivityIndicator />}</View>
       )}
     />
   );
