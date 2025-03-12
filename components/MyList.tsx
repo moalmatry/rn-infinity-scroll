@@ -2,12 +2,13 @@ import character from "../data/character.json";
 import CharacterListItem from "./CharacterListItem";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
+
+const initialPage = "https://rickandmortyapi.com/api/character";
+
 const MyList = () => {
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<any[]>([]);
-  const [nextPage, setNextPage] = useState(
-    "https://rickandmortyapi.com/api/character"
-  );
+  const [nextPage, setNextPage] = useState("");
 
   // const fetchItems = async () => {
   //   setLoading(true);
@@ -19,11 +20,16 @@ const MyList = () => {
   //   setLoading(false);
   // };
 
-  const fetchNextPage = async () => {
+  const onRefresh = () => {
+    setItems([]);
+    setNextPage(initialPage);
+  };
+
+  const fetchPage = async (url: string) => {
     if (loading) return;
     console.log("loading next page");
     setLoading(true);
-    const response = await fetch(nextPage);
+    const response = await fetch(url);
     const responseJson = await response.json();
     // console.log(responseJson.info);
     setItems((prev) => [...prev, ...responseJson.results]);
@@ -32,7 +38,7 @@ const MyList = () => {
   };
 
   useEffect(() => {
-    fetchNextPage();
+    fetchPage(initialPage);
   }, []);
 
   // if (loading) return <ActivityIndicator />;
@@ -41,11 +47,13 @@ const MyList = () => {
       data={items}
       renderItem={({ item }) => <CharacterListItem character={item} />}
       contentContainerStyle={{ gap: 10 }}
-      onEndReached={fetchNextPage}
+      onEndReached={() => fetchPage(nextPage)}
       onEndReachedThreshold={3}
       ListFooterComponent={() => (
         <View>{loading && <ActivityIndicator />}</View>
       )}
+      refreshing={loading}
+      onRefresh={() => console.warn("Hello World")}
     />
   );
 };
